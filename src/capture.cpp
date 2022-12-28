@@ -744,15 +744,20 @@ void acquisition::Capture::init_cameras(bool soft = false) {
                 } else{ // sets the configuration for external trigger: used for all slave cameras 
                         // in master slave setup. Also in the mode when another sensor such as IMU triggers 
                         // the camera
-                    cams[i].setEnumValue("TriggerMode", "On");
-                    cams[i].setEnumValue("LineSelector", "Line3");
-                    cams[i].setEnumValue("TriggerSource", "Line3");
-                    cams[i].setEnumValue("TriggerSelector", "FrameStart");
-                    cams[i].setEnumValue("LineMode", "Input");
-                    
-//                    cams[i].setFloatValue("TriggerDelay", 40.0);
-                    cams[i].setEnumValue("TriggerOverlap", "ReadOut");//"Off"
-                    cams[i].setEnumValue("TriggerActivation", "RisingEdge");
+//                     cams[i].setEnumValue("TriggerMode", "On");
+//                     cams[i].setEnumValue("LineSelector", "Line3");
+//                     cams[i].setEnumValue("TriggerSource", "Line3");
+//                     cams[i].setEnumValue("TriggerSelector", "FrameStart");
+//                     cams[i].setEnumValue("LineMode", "Input");
+//                     
+// //                    cams[i].setFloatValue("TriggerDelay", 40.0);
+//                     cams[i].setEnumValue("TriggerOverlap", "ReadOut");//"Off"
+//                     cams[i].setEnumValue("TriggerActivation", "RisingEdge");
+                    //
+                      cams[i].setEnumValue("TriggerMode", "On");
+                      cams[i].setEnumValue("LineSelector", "Line2");
+                      cams[i].setEnumValue("LineMode", "Output");
+                      cams[i].setEnumValue("TriggerSource", "Software");
                 }
             }
         }
@@ -997,12 +1002,14 @@ void acquisition::Capture::run_soft_trig() {
 
     // Camera directories created at first save
     
-    if (LIVE_)namedWindow("Acquisition", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO);
+    if (LIVE_)namedWindow("Acquisition", WINDOW_NORMAL | WINDOW_KEEPRATIO);
 
     int count = 0;
     
     if (!EXTERNAL_TRIGGER_) {
-        cams[MASTER_CAM_].trigger();
+        // cams[MASTER_CAM_].trigger();
+        cams[0].trigger();
+        cams[1].trigger();
     }
     
     get_mat_images();
@@ -1046,7 +1053,7 @@ void acquisition::Capture::run_soft_trig() {
                 }
             }
 
-            int key = cvWaitKey(1);
+            int key = waitKey(1);
             ROS_DEBUG_STREAM("Key press: "<<(key & 255)<<endl);
             
             if ( (key & 255)!=255 ) {
@@ -1070,7 +1077,7 @@ void acquisition::Capture::run_soft_trig() {
                     }
                 } else if( (key & 255)==27 ) {  // ESC
                     ROS_INFO_STREAM("Terminating...");
-                    cvDestroyAllWindows();
+                    destroyAllWindows();
                     ros::shutdown();
                     break;
                 }
@@ -1082,7 +1089,9 @@ void acquisition::Capture::run_soft_trig() {
             // Call update functions
 
             if (!EXTERNAL_TRIGGER_) {
-                cams[MASTER_CAM_].trigger();
+                // cams[MASTER_CAM_].trigger();
+                cams[0].trigger();
+                cams[1].trigger();
             }
             get_mat_images();
 
@@ -1098,7 +1107,7 @@ void acquisition::Capture::run_soft_trig() {
                 ROS_INFO_STREAM(" Recorded frames "<<count<<" / "<<nframes_);
                 if (count > nframes_) {
                     ROS_INFO_STREAM(nframes_ << " frames recorded. Terminating...");
-                    cvDestroyAllWindows();
+                    destroyAllWindows();
                     break;
                 }
             }
